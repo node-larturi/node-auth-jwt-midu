@@ -1,5 +1,8 @@
-import crypto from 'crypto'
+import crypto from 'node:crypto'
+
 import DBLocal from 'db-local'
+import bcrypt from 'bcrypt'
+
 const { Schema } = new DBLocal({ path: './db' })
 
 const User = Schema('User', {
@@ -24,13 +27,16 @@ export class UserRepository {
     const user = User.findOne({ username })
     if (user) throw new error('Username already exists')
 
+    // Encriptar el password
+    const hashedPassword = bcrypt.hashSync(password, 10)
+
     // Crear el usuario
     const id = crypto.randomUUID()
 
     const newUser = {
       _id: id,
       username,
-      password
+      password: hashedPassword
     }
 
     User.create(newUser).save()
