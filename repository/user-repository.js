@@ -56,4 +56,17 @@ export class UserRepository {
       throw error
     }
   }
+
+  static async findById(id) {
+    try {
+      const user = await User.findOne({ _id: id });
+      if (!user) {
+        throw new Error('User not found');
+      }
+      return user;
+    } catch (error) {
+      console.error('Error finding user by id:', error);
+      throw error;
+    }
+  }
 }

@@ -36,7 +36,7 @@ curl --location 'http://localhost:3000/api/register' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "Lisandro",
-    "password": "12345678Aa!"
+    "password": "your-password"
 }'
 ```
 
@@ -47,6 +47,14 @@ curl --location 'http://localhost:3000/api/login' \
 --header 'Content-Type: application/json' \
 --data '{
     "username": "Lisandro",
-    "password": "12345678Aa!"
+    "password": "your-password"
 }'
+```
+
+### Refresh Token
+
+```bash
+curl -X POST http://localhost:3000/api/auth/refresh-token \
+  -H "Content-Type: application/json" \
+  -H "Cookie: refresh_token=your-refresh-token"
 ```

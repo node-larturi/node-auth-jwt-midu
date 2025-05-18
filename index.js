@@ -6,10 +6,18 @@ import jwt from 'jsonwebtoken';
 
 import { PORT, JWT_SECRET } from './config.js';
 
+// API routes
+import loginApiRoute from './routes/api/login.route.js';
+import registerApiRoute from './routes/api/register.route.js';
+import logoutApiRoute from './routes/api/logout.route.js';
+import refreshTokenApiRoute from './routes/api/refresh-token.route.js';
+
+// Public pages
 import loginRoute from './routes/login.route.js';
 import registerRoute from './routes/register.route.js';
-import logoutRoute from './routes/logout.route.js';
-import protectedRoute from './routes/protected.js';
+
+// Protected pages
+import protectedRoute from './routes/protected.route.js';
 
 const app = express();
 
@@ -65,10 +73,17 @@ app.set('views', './views');
 app.use(express.static('public'));
 
 // APIRoutes
-app.use('/', loginRoute);
-app.use('/', registerRoute);
-app.use('/', logoutRoute);
-app.use('/', protectedRoute);
+app.use('/api', loginApiRoute);
+app.use('/api', registerApiRoute);
+app.use('/api', logoutApiRoute);
+app.use('/api', refreshTokenApiRoute);
+
+// Protected pages
+app.use('/protected', protectedRoute);
+
+// Public pages
+app.use('/login', loginRoute);
+app.use('/register', registerRoute);
 
 // Home - Redirect to login
 app.get('/', (req, res) => {
@@ -78,11 +93,6 @@ app.get('/', (req, res) => {
   }
   res.redirect('/login');
 });
-
-// API Routes
-app.use('/api', loginRoute);
-app.use('/api', registerRoute);
-app.use('/api', logoutRoute)
 
 // Error handling middleware
 app.use((err, req, res, next) => {
