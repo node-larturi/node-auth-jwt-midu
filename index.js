@@ -9,6 +9,7 @@ import { PORT, JWT_SECRET } from './config.js';
 import loginRoute from './routes/login.route.js';
 import registerRoute from './routes/register.route.js';
 import logoutRoute from './routes/logout.route.js';
+import protectedRoute from './routes/protected.js';
 
 const app = express();
 
@@ -63,7 +64,11 @@ app.set('views', './views');
 // Static files
 app.use(express.static('public'));
 
-// Routes
+// APIRoutes
+app.use('/', loginRoute);
+app.use('/', registerRoute);
+app.use('/', logoutRoute);
+app.use('/', protectedRoute);
 
 // Home - Redirect to login
 app.get('/', (req, res) => {
@@ -72,31 +77,6 @@ app.get('/', (req, res) => {
     return res.redirect('/protected');
   }
   res.redirect('/login');
-});
-
-// Login page
-app.get('/login', (req, res) => {
-  const { user } = req.session;
-  if (user) {
-    return res.redirect('/protected');
-  }
-  res.render('login');
-});
-
-// Register page
-app.get('/register', (req, res) => {
-  const { user } = req.session;
-  if (user) {
-    return res.redirect('/protected');
-  }
-  res.render('register');
-});
-
-// Protected route
-app.get('/protected', (req, res) => {
-  const { user } = req.session;
-  if(!user) return res.redirect('/')
-  res.render('protected', { user });
 });
 
 // API Routes
