@@ -21,9 +21,17 @@ export const validateAuth = (req, res, next) => {
     authSchema.parse(req.body)
     next()
   } catch (error) {
+    const errors = error.errors.map(err => {
+      return {
+        field: err.path[0],
+        message: err.message
+      }
+    })
+    
     res.status(400).json({
       error: true,
-      message: error.errors[0]?.message || 'Invalid input'
+      message: 'Validation failed',
+      details: errors
     })
   }
 }

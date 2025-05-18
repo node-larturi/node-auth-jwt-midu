@@ -2,7 +2,7 @@ import express from 'express'
 const router = express.Router()
 
 router.post('/protected', (req, res) => {
-  res.send('Protected')
+  res.render('protected', { username: "Luis"})
 })
 
 export default router
