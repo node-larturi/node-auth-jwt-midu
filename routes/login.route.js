@@ -1,5 +1,5 @@
 import express from 'express'
-import { validateAuth } from '../middleware/validation.middleware.js'
+import { validateAuth } from '../schemas/auth.schema.js'
 import { UserRepository } from '../repository/user-repository.js'
 
 const router = express.Router()
