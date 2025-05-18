@@ -13,11 +13,11 @@ import logoutApiRoute from './routes/api/logout.route.js';
 import refreshTokenApiRoute from './routes/api/refresh-token.route.js';
 
 // Public pages
-import loginRoute from './routes/login.route.js';
-import registerRoute from './routes/register.route.js';
+import loginRoute from './routes/pages/login.route.js';
+import registerRoute from './routes/pages/register.route.js';
 
 // Protected pages
-import protectedRoute from './routes/protected.route.js';
+import protectedRoute from './routes/pages/protected.route.js';
 
 const app = express();
 
