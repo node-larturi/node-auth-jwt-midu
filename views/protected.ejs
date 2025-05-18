@@ -1,6 +1,54 @@
-<html>
-    <body>
-        <h1>Hola <%= username %>!</h1>
-        <p>Esto es un contenido protegido</p>
-    </body>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Protegida</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .message.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
+        }
+        .message.success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #a5d6a7;
+        }
+    </style>
+</head>
+<body>
+    <% if (messages && messages.error && messages.error.length) { %>
+        <% messages.error.forEach(msg => { %>
+            <div class="message error"><%= msg %></div>
+        <% }); %>
+    <% } %>
+
+    <% if (messages && messages.success && messages.success.length) { %>
+        <% messages.success.forEach(msg => { %>
+            <div class="message success"><%= msg %></div>
+        <% }); %>
+    <% } %>
+
+
+    <h1>Bienvenido, <%= user.username %>!</h1>
+    <p>ID de usuario: <%= user.id %></p>
+    <p>Esta es un área protegida. Solo los usuarios autenticados pueden ver este contenido.</p>
+    
+    <div>
+        <a href="/logout">Cerrar sesión</a>
+    </div>
+</body>
 </html>

@@ -2,7 +2,9 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import flash from 'connect-flash';
-import { PORT } from './config.js';
+import jwt from 'jsonwebtoken';
+
+import { PORT, JWT_SECRET } from './config.js';
 
 import loginRoute from './routes/login.route.js';
 import registerRoute from './routes/register.route.js';
@@ -10,17 +12,17 @@ import logoutRoute from './routes/logout.route.js';
 
 const app = express();
 
-// Middleware
+// Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Session configuration
 app.use(session({
-  secret: 'your-secret-key', // Change this to a secure secret in production
+  secret: JWT_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false } // Set to true if using HTTPS
+  cookie: { secure: process.env.NODE_ENV === 'production' } // Set to true if using HTTPS
 }));
 
 // Flash messages middleware
@@ -35,6 +37,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// Auth middleware
+app.use((req, res, next) => {
+  const token = req.cookies.access_token;
+  
+  if (token) {
+    try {
+      const data = jwt.verify(token, JWT_SECRET);
+      req.session.user = data;
+    } catch (error) {
+      console.error('Token verification failed:', error.message);
+      req.session.user = null;
+    }
+  } else {
+    req.session.user = null;
+  }
+
+  next();
+});
+
 // View engine setup
 app.set('view engine', 'ejs');
 app.set('views', './views');
@@ -43,43 +64,34 @@ app.set('views', './views');
 app.use(express.static('public'));
 
 // Routes
+
+// Home (Login and Register)
 app.get('/', (req, res) => {
-  res.render('index', {
-    messages: {
-      error: res.locals.messages.error,
-      success: res.locals.messages.success
-    }
-  });
+  const { user } = req.session;
+  if (user) {
+    return res.redirect('/protected');
+  }
+  res.render('index');
 });
 
+// Protected route
+app.get('/protected', (req, res) => {
+  const { user } = req.session;
+  if(!user) return res.redirect('/')
+  res.render('protected', { user });
+});
+
+// Logout route
+app.get('/logout', (req, res) => {
+  req.session.user = null;
+  res.clearCookie('access_token');
+  res.redirect('/');
+});
+
+// API Routes
 app.use('/api', loginRoute);
 app.use('/api', registerRoute);
 app.use('/api', logoutRoute);
-
-app.get('/protected', (req, res) => {
-  const token = req.cookies.access_token
-
-  if (!token) {
-    return res.status(401).json({
-      error: true,
-      message: 'Unauthorized'
-    })
-  }
-
-  try {
-    const data = jwt.verify(token, JWT_SECRET)
-    console.log(data)
-    res.render('protected', {
-      data
-    });
-  } catch (error) {
-    return res.status(401).json({
-      error: true,
-      message: 'Unauthorized'
-    })
-  }
- 
-});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
