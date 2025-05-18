@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            transition: all 0.3s ease;
+        }
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .error-field {
+            border-color: #e53e3e !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Iniciar Sesión</h1>
+        
+        <% if (typeof messages !== 'undefined' && messages.error && messages.error.length > 0) { %>
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <%= messages.error[0] %>
+            </div>
+        <% } %>
+
+        <div class="form-container bg-white p-8 rounded-lg shadow-md">
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label for="login-username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="login-username" name="username" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="login-password" name="password" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="text-sm">
+                        <a href="/register" class="font-medium text-blue-600 hover:text-blue-500">
+                            ¿No tienes una cuenta? Regístrate
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Iniciar Sesión
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar errores en el formulario
+        function showFormErrors(formId, errors) {
+            // Limpiar errores previos
+            document.querySelectorAll(`#${formId} .error-message`).forEach(el => el.remove());
+            document.querySelectorAll(`#${formId} input`).forEach(input => {
+                input.classList.remove('error-field');
+            });
+
+            // Mostrar errores
+            if (errors && errors.details) {
+                errors.details.forEach(error => {
+                    const field = document.querySelector(`#${formId} [name="${error.field}"]`);
+                    if (field) {
+                        field.classList.add('error-field');
+                        const errorElement = document.createElement('p');
+                        errorElement.className = 'error-message';
+                        errorElement.textContent = error.message;
+                        field.parentNode.appendChild(errorElement);
+                    }
+                });
+            } else if (errors && errors.message) {
+                // Mostrar mensaje de error general
+                const form = document.getElementById(formId);
+                const errorElement = document.createElement('div');
+                errorElement.className = 'mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded';
+                errorElement.textContent = errors.message;
+                form.prepend(errorElement);
+            }
+        }
+
+        // Manejar envío del formulario de login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showFormErrors('loginForm', data);
+                } else {
+                    // Redirigir al usuario después de un inicio de sesión exitoso
+                    window.location.href = '/protected';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showFormErrors('loginForm', { message: 'Ocurrió un error al procesar la solicitud' });
+            }
+        });
+    </script>
+</body>
+</html>

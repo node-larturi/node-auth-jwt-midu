@@ -65,13 +65,31 @@ app.use(express.static('public'));
 
 // Routes
 
-// Home (Login and Register)
+// Home - Redirect to login
 app.get('/', (req, res) => {
   const { user } = req.session;
   if (user) {
     return res.redirect('/protected');
   }
-  res.render('index');
+  res.redirect('/login');
+});
+
+// Login page
+app.get('/login', (req, res) => {
+  const { user } = req.session;
+  if (user) {
+    return res.redirect('/protected');
+  }
+  res.render('login');
+});
+
+// Register page
+app.get('/register', (req, res) => {
+  const { user } = req.session;
+  if (user) {
+    return res.redirect('/protected');
+  }
+  res.render('register');
 });
 
 // Protected route
@@ -81,17 +99,10 @@ app.get('/protected', (req, res) => {
   res.render('protected', { user });
 });
 
-// Logout route
-app.get('/logout', (req, res) => {
-  req.session.user = null;
-  res.clearCookie('access_token');
-  res.redirect('/');
-});
-
 // API Routes
 app.use('/api', loginRoute);
 app.use('/api', registerRoute);
-app.use('/api', logoutRoute);
+app.use('/api', logoutRoute)
 
 // Error handling middleware
 app.use((err, req, res, next) => {

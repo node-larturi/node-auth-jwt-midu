@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .form-container {
+            transition: all 0.3s ease;
+        }
+        .form-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        .error-field {
+            border-color: #e53e3e !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">Registro</h1>
+        
+        <% if (typeof messages !== 'undefined' && messages.error && messages.error.length > 0) { %>
+            <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+                <%= messages.error[0] %>
+            </div>
+        <% } %>
+
+        <% if (typeof messages !== 'undefined' && messages.success && messages.success.length > 0) { %>
+            <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
+                <%= messages.success[0] %>
+            </div>
+        <% } %>
+
+        <div class="form-container bg-white p-8 rounded-lg shadow-md">
+            <form id="registerForm" class="space-y-6">
+                <div>
+                    <label for="register-username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="register-username" name="username" required 
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+                    <input type="password" id="register-password" name="password" required
+                           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-green-500 focus:border-green-500">
+                </div>
+                <div class="flex items-center justify-between">
+                    <div class="text-sm">
+                        <a href="/login" class="font-medium text-blue-600 hover:text-blue-500">
+                            ¿Ya tienes una cuenta? Inicia sesión
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                        Registrarse
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Función para mostrar errores en el formulario
+        function showFormErrors(formId, errors) {
+            // Limpiar errores previos
+            document.querySelectorAll(`#${formId} .error-message`).forEach(el => el.remove());
+            document.querySelectorAll(`#${formId} input`).forEach(input => {
+                input.classList.remove('error-field');
+            });
+
+            // Mostrar errores
+            if (errors && errors.details) {
+                errors.details.forEach(error => {
+                    const field = document.querySelector(`#${formId} [name="${error.field}"]`);
+                    if (field) {
+                        field.classList.add('error-field');
+                        const errorElement = document.createElement('p');
+                        errorElement.className = 'error-message';
+                        errorElement.textContent = error.message;
+                        field.parentNode.appendChild(errorElement);
+                    }
+                });
+            } else if (errors && errors.message) {
+                // Mostrar mensaje de error general
+                const form = document.getElementById(formId);
+                const errorElement = document.createElement('div');
+                errorElement.className = 'mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded';
+                errorElement.textContent = errors.message;
+                form.prepend(errorElement);
+            }
+        }
+
+        // Manejar envío del formulario de registro
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(Object.fromEntries(formData))
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    showFormErrors('registerForm', data);
+                } else {
+                    // Mostrar mensaje de éxito y redirigir al login
+                    const successElement = document.createElement('div');
+                    successElement.className = 'mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded';
+                    successElement.textContent = '¡Registro exitoso! Redirigiendo al inicio de sesión...';
+                    document.querySelector('form').prepend(successElement);
+                    
+                    // Redirigir al login después de 2 segundos
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showFormErrors('registerForm', { message: 'Ocurrió un error al procesar la solicitud' });
+            }
+        });
+    </script>
+</body>
+</html>

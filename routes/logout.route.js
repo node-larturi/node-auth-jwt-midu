@@ -1,8 +1,10 @@
 import express from 'express'
 const router = express.Router()
 
-router.post('/logout', (req, res) => {
-  res.send('Logout')
-})
+router.get('/logout', (req, res) => {
+  req.session.user = null;
+  res.clearCookie('access_token');
+  res.redirect('/');
+});
 
 export default router
